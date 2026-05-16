@@ -680,7 +680,6 @@
             background: var(--bg-card); border: 1px solid var(--border-subtle);
             color: var(--text-secondary); transition: var(--transition-bounce);
         }
-        .social-btn.facebook:hover { background: #1877f2; border-color: #1877f2; box-shadow: 0 10px 25px rgba(24,119,242,0.4); color: #fff; }
         .social-btn.whatsapp:hover { background: #25D366; border-color: #25D366; box-shadow: 0 10px 25px rgba(37,211,102,0.4); color: #fff; }
         .footer-text { color: var(--text-muted); font-size: 0.9rem; }
         .heart { color: var(--pink-soft); animation: heartBeat 1.2s ease-in-out infinite; display: inline-block; }
@@ -902,10 +901,9 @@
             </div>
         </section>
 
-        <!-- FOOTER -->
+        <!-- FOOTER (بدون فيسبوك) -->
         <footer class="site-footer">
             <div class="footer-social">
-                <a href="https://www.facebook.com/profile.php?id=61587718537035" target="_blank" class="social-btn facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 <a href="https://wa.me/213666207653" target="_blank" class="social-btn whatsapp"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
             <p class="footer-text"><span data-i18n="footer_text">صنع بـ</span> <span class="heart">❤️</span> <span data-i18n="footer_text_2">لأجل أطفالنا - جميع الحقوق محفوظة © 2025</span></p>
@@ -914,11 +912,10 @@
 
     <script>
         (function() {
-            // ============ PWA INSTALLATION (محسّن) ============
+            // ============ PWA INSTALLATION ============
             let deferredPrompt;
             const installBtn = document.getElementById('installBtn');
 
-            // بيان التطبيق مع أيقونات متعددة و purpose لضمان ظهور الشعار
             const manifestData = {
                 name: 'المعلمة عبلة - تعليم الإنجليزية',
                 short_name: 'المعلمة عبلة',
@@ -928,17 +925,8 @@
                 background_color: '#08080c',
                 theme_color: '#08080c',
                 icons: [
-                    {
-                        src: 'https://i.ibb.co/C58n3Dkp/logo.png',
-                        sizes: '192x192',
-                        type: 'image/png'
-                    },
-                    {
-                        src: 'https://i.ibb.co/C58n3Dkp/logo.png',
-                        sizes: '512x512',
-                        type: 'image/png',
-                        purpose: 'any maskable'
-                    }
+                    { src: 'https://i.ibb.co/C58n3Dkp/logo.png', sizes: '192x192', type: 'image/png' },
+                    { src: 'https://i.ibb.co/C58n3Dkp/logo.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
                 ]
             };
 
@@ -946,31 +934,22 @@
             const manifestUrl = URL.createObjectURL(manifestBlob);
             document.getElementById('manifestLink').href = manifestUrl;
 
-            // Service Worker للتخزين المؤقت
             if ('serviceWorker' in navigator) {
                 const swCode = `
                     const CACHE_NAME = 'abla-teacher-v2';
-                    const urlsToCache = [
-                        '.',
-                        'https://i.ibb.co/C58n3Dkp/logo.png'
-                    ];
                     self.addEventListener('install', event => {
                         event.waitUntil(
-                            caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+                            caches.open(CACHE_NAME).then(cache => cache.addAll(['.', 'https://i.ibb.co/C58n3Dkp/logo.png']))
                         );
                     });
                     self.addEventListener('fetch', event => {
-                        event.respondWith(
-                            caches.match(event.request).then(response => response || fetch(event.request))
-                        );
+                        event.respondWith(caches.match(event.request).then(response => response || fetch(event.request)));
                     });
                 `;
                 const swBlob = new Blob([swCode], { type: 'application/javascript' });
-                const swUrl = URL.createObjectURL(swBlob);
-                navigator.serviceWorker.register(swUrl).catch(err => console.log('Service Worker:', err));
+                navigator.serviceWorker.register(URL.createObjectURL(swBlob));
             }
 
-            // التعامل مع حدث التثبيت
             window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 deferredPrompt = e;
@@ -981,10 +960,7 @@
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then((choiceResult) => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('تم تثبيت التطبيق');
-                            installBtn.classList.remove('show');
-                        }
+                        if (choiceResult.outcome === 'accepted') installBtn.classList.remove('show');
                         deferredPrompt = null;
                     });
                 }
